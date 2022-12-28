@@ -84,15 +84,10 @@ export class App extends Component {
               <Button response={this.loadMore} />
             </>
           )}
+          {!isLoading && images.length < 0 && <MyLoader />}
           {error && (
             <h1>Sorry, there are no images matching your search {tags}.</h1>
           )}
-
-          {!isLoading && <MyLoader />}
-          {images.length > 0 && !isLoading && (
-            <Button response={this.loadMore} />
-          )}
-
           {isShowModal && (
             <Modal onClose={this.toggleModal}>
               <img src={largeImageURL} alt={tags} />
