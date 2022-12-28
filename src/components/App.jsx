@@ -43,7 +43,7 @@ export class App extends Component {
         .catch(error => this.setState({ error }))
         .finally(() => this.setState({ showLoader: false }));
     }
-  }
+  };
 
   loadMore = e => {
     e.preventDefault();
