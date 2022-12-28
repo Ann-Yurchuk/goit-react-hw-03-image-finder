@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import axios from 'axios';
+import * as API from 'fetch/fetch';
 import { ToastContainer } from 'react-toastify';
 import css from './App.module.css';
 import Searchbar from './Searchbar/Searchbar';
@@ -13,7 +13,7 @@ export class App extends Component {
     page: 1,
     query: '',
     images: [],
-    error: null,
+    error: '',
     isLoading: false,
     isShowModal: false,
     largeImageURL: '',
@@ -21,6 +21,7 @@ export class App extends Component {
   };
 
   async componentDidUpdate(_, prevState) {
+    const { query, page } = this.state;
     console.log(this.state.query);
     if (
       prevState.page !== this.state.page ||
@@ -28,21 +29,24 @@ export class App extends Component {
     ) {
       this.setState({ isLoading: true });
 
-      try {
-        const response = await axios.get(
-          `https://pixabay.com/api/?key=31258232-e3c8f840f0c2c0981cedb6e2e&q=${this.state.query}&image_type=photo&orientation=horizontal&safesearch=true&per_page=12&page=${this.state.page}`
-        );
-
-        this.setState({ images: response.data.hits });
-      } catch (error) {
-        this.setState({ error });
-      } finally {
-        this.setState({ isLoading: false });
-      }
+      API.getImages(query, page)
+        .then(({ hits }) => {
+          if (hits.length) {
+            return this.setState(prev => ({
+              images: [...prev.images, ...hits],
+            }));
+          }
+          this.setState(prevState => ({
+            page: prevState.page + 1,
+          }));
+        })
+        .catch(error => this.setState({ error }))
+        .finally(() => this.setState({ showLoader: false }));
     }
-  };
+  }
 
-  loadMore = () => {
+  loadMore = e => {
+    e.preventDefault();
     this.setState(prevState => ({
       page: prevState.page + 1,
     }));
@@ -74,12 +78,21 @@ export class App extends Component {
       <div className={css.App}>
         <>
           <Searchbar onSubmit={this.onSearch} />
-          <ImageGallery openModal={this.openModal} images={images} />
+          {images.length !== 0 && (
+            <>
+              <ImageGallery openModal={this.openModal} images={images} />
+              <Button response={this.loadMore} />
+            </>
+          )}
           {error && (
             <h1>Sorry, there are no images matching your search {tags}.</h1>
           )}
-          {isLoading && <MyLoader />}
-          {images.length > 0 && <Button response={this.loadMore} />}
+
+          {!isLoading && <MyLoader />}
+          {images.length > 0 && !isLoading && (
+            <Button response={this.loadMore} />
+          )}
+
           {isShowModal && (
             <Modal onClose={this.toggleModal}>
               <img src={largeImageURL} alt={tags} />

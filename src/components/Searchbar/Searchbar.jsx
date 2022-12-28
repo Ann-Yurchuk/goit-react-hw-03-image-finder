@@ -22,7 +22,7 @@ export default class Searchbar extends Component {
         'Sorry, there are no images matching your search query. Please try again.',
         { theme: 'colored' }
       );
-    }
+    };
 
     this.props.onSubmit(this.state.query);
     this.setState({

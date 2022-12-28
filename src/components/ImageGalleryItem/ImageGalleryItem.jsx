@@ -7,16 +7,18 @@ export const ImageGalleryItem = ({
   openModal,
 }) => {
   return (
-    <li
-      className={css.ImageGalleryItem}
-      onClick={() => openModal(largeImageURL)}
-    >
-      <img
-        className={css.ImageGalleryItemImage}
-        src={webformatURL}
-        alt={tags}
-      />
-    </li>
+    <>
+      <li 
+        className={css.ImageGalleryItem}
+        onClick={() => openModal(largeImageURL)}
+      >
+        <img
+          className={css.ImageGalleryItemImage}
+          src={webformatURL}
+          alt={tags}
+        />
+      </li>
+    </>
   );
 };
 
