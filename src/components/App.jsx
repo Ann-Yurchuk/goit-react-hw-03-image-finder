@@ -18,6 +18,7 @@ export class App extends Component {
     isShowModal: false,
     largeImageURL: '',
     tags: '',
+    totalImages: 0,
   };
 
   async componentDidUpdate(_, prevState) {
@@ -28,12 +29,12 @@ export class App extends Component {
       prevState.query !== this.state.query
     ) {
       this.setState({ isLoading: true });
-
       API.getImages(query, page)
-        .then(({ hits }) => {
+        .then(({ hits, totalHits }) => {
           if (hits.length) {
             return this.setState(prev => ({
               images: [...prev.images, ...hits],
+              totalImages: totalHits,
             }));
           }
           this.setState(prevState => ({
@@ -41,9 +42,11 @@ export class App extends Component {
           }));
         })
         .catch(error => this.setState({ error }))
-        .finally(() => this.setState({ showLoader: false }));
+        .finally(() => {
+          this.setState({ isLoading: false });
+        });
     }
-  };
+  }
 
   loadMore = e => {
     e.preventDefault();
@@ -71,6 +74,10 @@ export class App extends Component {
     }));
   };
 
+  ifLoadMore = () => {
+    return this.state.totalImages - this.state.images.length > 12;
+  };
+
   render() {
     const { isLoading, images, isShowModal, largeImageURL, tags, error } =
       this.state;
@@ -81,10 +88,13 @@ export class App extends Component {
           {images.length !== 0 && (
             <>
               <ImageGallery openModal={this.openModal} images={images} />
-              <Button response={this.loadMore} />
+              {this.ifLoadMore() && !isLoading && (
+                <Button response={this.loadMore} />
+              )}
             </>
           )}
-          {!isLoading && images.length < 0 && <MyLoader />}
+          {isLoading && <MyLoader />}
+
           {error && (
             <h1>Sorry, there are no images matching your search {tags}.</h1>
           )}
